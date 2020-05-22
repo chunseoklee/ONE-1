@@ -34,7 +34,7 @@ CONFIG(USE_SCHEDULER           , bool         , "0")
 CONFIG(OP_SEQ_MAX_NODE         , int          , "0")
 CONFIG(TRACE_FILEPATH          , std::string  , "")
 CONFIG(FP16_ENABLE             , bool         , "0")
-CONFIG(RUY_THREADS             , int          , "-1")
+CONFIG(RUY_THREADS             , int          , "1")
 
 // Auto-generate all operations
 
