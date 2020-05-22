@@ -86,6 +86,7 @@ NNFW_STATUS nnfw_prepare(nnfw_session *session)
  */
 NNFW_STATUS nnfw_run(nnfw_session *session)
 {
+  ATRACE_NAME("nnfw_run");
   NNFW_RETURN_ERROR_IF_NULL(session);
   return session->run();
 }

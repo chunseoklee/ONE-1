@@ -17,6 +17,24 @@
 #include "ExecutorBase.h"
 #include "util/logging.h"
 
+#include <android/trace.h>
+
+#define ATRACE_NAME(name) ScopedTrace ___tracer(name)
+
+// ATRACE_CALL is an ATRACE_NAME that uses the current function name.
+#define ATRACE_CALL() ATRACE_NAME(__FUNCTION__)
+
+class ScopedTrace {
+  public:
+    inline ScopedTrace(const char *name) {
+      ATrace_beginSection(name);
+    }
+
+    inline ~ScopedTrace() {
+      ATrace_endSection();
+    }
+};
+
 namespace onert
 {
 namespace exec
@@ -169,6 +187,7 @@ void ExecutorBase::execute()
 
 void ExecutorBase::execute(const IODescription &desc)
 {
+  ATRACE_CALL();
   // For thread-safe, use mutex
   // TODO: if all used backends on this executor are thread-safe,
   //       do not need to use mutex (otherwise, use mutex)
@@ -178,6 +197,7 @@ void ExecutorBase::execute(const IODescription &desc)
   std::vector<std::unique_ptr<ISink>> sinks{_graph.getOutputs().size()};
 
   // Set input(s)
+  ATrace_beginSection("nnfw_source");
   for (uint32_t n = 0; n < _graph.getInputs().size(); ++n)
   {
     ir::IOIndex input_index{n};
@@ -220,10 +240,14 @@ void ExecutorBase::execute(const IODescription &desc)
 
     _input_tensors[n]->access(setter);
   }
+  ATrace_endSection();
 
+  ATrace_beginSection("executeImpl");
   executeImpl();
+  ATrace_endSection();
 
   // Get output(s)
+  ATrace_beginSection("nnfw_sink");
   for (uint32_t n = 0; n < _graph.getOutputs().size(); ++n)
   {
     ir::IOIndex output_index{n};
@@ -240,6 +264,7 @@ void ExecutorBase::execute(const IODescription &desc)
 
     _output_tensors[n]->access(getter);
   }
+  ATrace_endSection();
 }
 
 } // namespace exec

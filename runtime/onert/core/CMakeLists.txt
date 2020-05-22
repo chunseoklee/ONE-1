@@ -10,7 +10,12 @@ target_link_libraries(onert_core PRIVATE nnfw_common)
 target_link_libraries(onert_core PRIVATE nnfw_coverage)
 target_link_libraries(onert_core PRIVATE dl ${LIB_PTHREAD})
 target_link_libraries(onert_core INTERFACE ruy_instrumentation)
+find_library(LIBANDROID NAMES libandroid.so
+                        PATHS /home/twoflower/dev/ONE2/tools/cross/ndk/r20/ndk/platforms/android-27/arch-arm64/usr/lib
+                        REQUIRED)
+target_link_libraries(onert_core PUBLIC ${LIBANDROID})
 
+target_link_libraries(onert_core INTERFACE ruy_instrumentation)
 if(ENVVAR_ONERT_CONFIG)
   target_compile_definitions(onert_core PRIVATE ENVVAR_FOR_DEFAULT_CONFIG)
 endif(ENVVAR_ONERT_CONFIG)
