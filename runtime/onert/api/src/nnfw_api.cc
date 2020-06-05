@@ -17,6 +17,7 @@
 #include "nnfw_api_internal.h"
 #include "nnfw_version.h"
 
+
 #define NNFW_RETURN_ERROR_IF_NULL(p) \
   do                                 \
   {                                  \
@@ -32,6 +33,7 @@
  */
 NNFW_STATUS nnfw_create_session(nnfw_session **session)
 {
+  ATRACE_CALL();
   NNFW_RETURN_ERROR_IF_NULL(session);
 
   *session = new nnfw_session();
@@ -61,6 +63,7 @@ NNFW_STATUS nnfw_close_session(nnfw_session *session)
  */
 NNFW_STATUS nnfw_load_model_from_file(nnfw_session *session, const char *pacakge_file_path)
 {
+  ATRACE_CALL();
   NNFW_RETURN_ERROR_IF_NULL(session);
   return session->load_model_from_file(pacakge_file_path);
 }
@@ -74,6 +77,7 @@ NNFW_STATUS nnfw_load_model_from_file(nnfw_session *session, const char *pacakge
  */
 NNFW_STATUS nnfw_prepare(nnfw_session *session)
 {
+  ATRACE_CALL();
   NNFW_RETURN_ERROR_IF_NULL(session);
   return session->prepare();
 }
@@ -106,6 +110,7 @@ NNFW_STATUS nnfw_run(nnfw_session *session)
 NNFW_STATUS nnfw_set_input(nnfw_session *session, uint32_t index, NNFW_TYPE type,
                            const void *buffer, size_t length)
 {
+  ATRACE_CALL();
   NNFW_RETURN_ERROR_IF_NULL(session);
   return session->set_input(index, type, buffer, length);
 }
@@ -125,6 +130,7 @@ NNFW_STATUS nnfw_set_input(nnfw_session *session, uint32_t index, NNFW_TYPE type
 NNFW_STATUS nnfw_set_output(nnfw_session *session, uint32_t index, NNFW_TYPE type, void *buffer,
                             size_t length)
 {
+  ATRACE_CALL();
   NNFW_RETURN_ERROR_IF_NULL(session);
   return session->set_output(index, type, buffer, length);
 }
