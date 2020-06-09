@@ -31,7 +31,9 @@ final class NativeSessionWrapper implements AutoCloseable {
     }
 
     NativeSessionWrapper(@NonNull String nnpkg_path, @NonNull String backends) {
+        Trace.beginSection("CreateSession");
         _handle = nativeCreateSession();
+        Trace.endSection();
         nativeLoadModelFromFile(_handle, nnpkg_path);
         _backends = backends;
     }
