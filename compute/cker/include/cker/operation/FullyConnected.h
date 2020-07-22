@@ -79,7 +79,11 @@ inline void FullyConnected(const FullyConnectedParams &params, const Shape &inpu
                                       output_data, /*result_stride=*/1);
 
   // Apply activation function
-  ApplyActivationToVector(output_data, batch_size * num_units, params.activation, output_data);
+  if (params.activation != FusedActivationFunctionType::kNone)
+  {
+    // Apply activation function
+    ApplyActivationToVector(output_data, batch_size * num_units, params.activation, output_data);
+  }
 }
 
 inline void FullyConnected(const FullyConnectedParams &params, const Shape &input_shape,
@@ -195,7 +199,11 @@ inline void FullyConnectedHybrid(const FullyConnectedParams &params, const Shape
 #endif
 
   // Apply activation function to floats.
-  ApplyActivationToVector(output_data, batch_size * num_units, params.activation, output_data);
+  if (params.activation != FusedActivationFunctionType::kNone)
+  {
+    // Apply activation function
+    ApplyActivationToVector(output_data, batch_size * num_units, params.activation, output_data);
+  }
   return;
 }
 
