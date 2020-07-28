@@ -54,7 +54,7 @@ private:
   std::string _ts;
 };
 
-void emit_rusage(EventRecorder *rec, const std::string &ts)
+inline void emit_rusage(EventRecorder *rec, const std::string &ts)
 {
   struct rusage ru;
 
@@ -100,5 +100,5 @@ void EventCollector::onEvent(const Event &event)
   }
 
   // Trace resource usage per each event notification
-  emit_rusage(_rec, ts);
+  // emit_rusage(_rec, ts);
 }

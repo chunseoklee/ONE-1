@@ -112,21 +112,16 @@ std::string object(const CounterEvent &evt)
 
 void EventRecorder::emit(const DurationEvent &evt)
 {
-  std::lock_guard<std::mutex> lock{_mu};
-
   _duration_events.push_back(evt);
 }
 
 void EventRecorder::emit(const CounterEvent &evt)
 {
-  std::lock_guard<std::mutex> lock{_mu};
-
   _counter_events.push_back(evt);
 }
 
 void EventRecorder::writeToFile(std::ostream &os)
 {
-  std::lock_guard<std::mutex> lock{_mu};
 
   switch (_write_format)
   {

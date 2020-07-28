@@ -74,7 +74,7 @@ private:
 
 private:
   std::mutex _mu;
-  WriteFormat _write_format{WriteFormat::CHROME_TRACING};
+    WriteFormat _write_format{WriteFormat::SNPE_BENCHMARK};
   std::vector<DurationEvent> _duration_events;
   std::vector<CounterEvent> _counter_events;
 };
