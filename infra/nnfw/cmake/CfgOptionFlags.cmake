@@ -74,7 +74,7 @@ option(BUILD_TENSORFLOW_LITE_2_2_0 "Build TensorFlow Lite from the downloaded so
 option(BUILD_GTEST "Download and build Google Test" ON)
 option(BUILD_ARMCOMPUTE "Build ARM Compute from the downloaded source" ON)
 option(BUILD_RUY "Build ruy library from the downloaded source" ON)
-option(PROFILE_RUY "Enable ruy library profiling" OFF)
+option(PROFILE_RUY "Enable ruy library profiling" ON)
 
 #
 ## Default sample build configuration
