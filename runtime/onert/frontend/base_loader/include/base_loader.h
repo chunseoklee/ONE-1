@@ -116,6 +116,7 @@ protected:
   void loadDiv(const Operator *op, ir::Graph &subg);
   void loadPack(const Operator *op, ir::Graph &subg);
   void loadRelu(const Operator *op, ir::Graph &subg);
+  void loadLeakyReLU(const Operator *op, ir::Graph &subg);
   void loadRelu6(const Operator *op, ir::Graph &subg);
   void loadResizeBilinear(const Operator *op, ir::Graph &subg);
   void loadRsqrt(const Operator *op, ir::Graph &subg);
@@ -748,6 +749,21 @@ void BaseLoader<LoaderDomain, SpecificLoader>::loadRelu(const Operator *op, ir::
   loadOperationIO(op, inputs, outputs);
 
   std::unique_ptr<ir::Operation> new_op(new ir::operation::ReLU(inputs, outputs));
+  subg.addOperation(std::move(new_op));
+}
+
+template <typename LoaderDomain, typename SpecificLoader>
+void BaseLoader<LoaderDomain, SpecificLoader>::loadLeakyReLU(const Operator *op, ir::Graph &subg)
+{
+  ir::OperandIndexSequence inputs;
+  ir::OperandIndexSequence outputs;
+
+  loadOperationIO(op, inputs, outputs);
+
+  ir::operation::LeakyReLU::Param param;
+  param.alpha= op->builtin_options_as_LeakyReluOptions()->alpha();
+
+  std::unique_ptr<ir::Operation> new_op(new ir::operation::LeakyReLU(inputs, outputs, param));
   subg.addOperation(std::move(new_op));
 }
 
@@ -2014,6 +2030,9 @@ void BaseLoader<LoaderDomain, SpecificLoader>::loadOperation(const Operator *op,
       return;
     case BuiltinOperator::BuiltinOperator_DEQUANTIZE:
       loadDequantize(op,subg);
+      return;
+    case BuiltinOperator::BuiltinOperator_LEAKY_RELU:
+      loadLeakyReLU(op,subg);
       return;
     default:
       throw std::runtime_error(

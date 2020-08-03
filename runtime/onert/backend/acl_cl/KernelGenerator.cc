@@ -961,6 +961,26 @@ void KernelGenerator::visit(const ir::operation::ReLU &node)
   _return_fn = std::move(acl_fn);
 }
 
+void KernelGenerator::visit(const ir::operation::LeakyReLU &node)
+{
+  const auto output_index{node.getOutputs().at(0)};
+  const auto input_index{node.getInputs().at(ir::operation::LeakyReLU::Input::INPUT)};
+
+  auto output_tensor = _tensor_builder->at(output_index).get();
+  auto input_tensor = _tensor_builder->at(input_index).get();
+
+  auto fn = std::make_unique<arm_compute::CLActivationLayer>();
+
+  const ::arm_compute::ActivationLayerInfo act_info{
+      ::arm_compute::ActivationLayerInfo::ActivationFunction::LEAKY_RELU, node.param().alpha };
+
+  fn->configure(input_tensor->handle(), output_tensor->handle(), act_info);
+
+  auto acl_fn = asAclClFunction(std::move(fn));
+
+  _return_fn = std::move(acl_fn);
+}
+
 void KernelGenerator::visit(const ir::operation::ResizeBilinear &node)
 {
   const auto ofm_index{node.getOutputs().at(0)};

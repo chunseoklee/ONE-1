@@ -67,6 +67,7 @@ public:
   void visit(const ir::operation::Permute &) override;
   void visit(const ir::operation::RSQRT &) override;
   void visit(const ir::operation::ReLU &) override;
+  void visit(const ir::operation::LeakyReLU &) override;
   void visit(const ir::operation::ResizeBilinear &) override;
   void visit(const ir::operation::ReLU1 &) override;
   void visit(const ir::operation::ReLU6 &) override;

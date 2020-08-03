@@ -50,6 +50,7 @@
 #include "ir/operation/LSTM.h"
 #include "ir/operation/RSQRT.h"
 #include "ir/operation/ReLU.h"
+#include "ir/operation/LeakyReLU.h"
 #include "ir/operation/ResizeBilinear.h"
 #include "ir/operation/ReLU1.h"
 #include "ir/operation/ReLU6.h"
