@@ -172,6 +172,7 @@ protected:
   void loadFusedBatchNorm(const Operator *op, ir::Graph &subg);
   void loadLogSoftmax(const Operator *op, ir::Graph &subg);
   void loadQuantize(const Operator *op, ir::Graph &subg);
+  void loadDequantize(const Operator *op, ir::Graph &subg);
   void loadSpaceToDepth(const Operator *op, ir::Graph &subg);
 
 protected:
@@ -263,6 +264,8 @@ BaseLoader<LoaderDomain, SpecificLoader>::BaseLoader::tensorTypeToDataType(const
       return ir::DataType::QUANT_INT8_SYMM;
     case TensorType::TensorType_INT64:
       return ir::DataType::INT64;
+    case TensorType::TensorType_FLOAT16:
+      return ir::DataType::FLOAT16;
     default:
       throw std::runtime_error(
           std::string("Unsupported tensor type: ").append(EnumNameTensorType(type)));
@@ -1775,6 +1778,18 @@ void BaseLoader<LoaderDomain, SpecificLoader>::loadQuantize(const Operator *op, 
 }
 
 template <typename LoaderDomain, typename SpecificLoader>
+void BaseLoader<LoaderDomain, SpecificLoader>::loadDequantize(const Operator *op, ir::Graph &subg)
+{
+  ir::OperandIndexSequence inputs;
+  ir::OperandIndexSequence outputs;
+
+  loadOperationIO(op, inputs, outputs);
+
+  std::unique_ptr<ir::Operation> new_op(new ir::operation::Quantize(inputs, outputs));
+  subg.addOperation(std::move(new_op));
+}
+
+template <typename LoaderDomain, typename SpecificLoader>
 void BaseLoader<LoaderDomain, SpecificLoader>::loadOperation(const Operator *op, ir::Graph &subg)
 {
   const auto builtin_op = _model->operator_codes()->Get(op->opcode_index())->builtin_code();
@@ -1996,6 +2011,9 @@ void BaseLoader<LoaderDomain, SpecificLoader>::loadOperation(const Operator *op,
       return;
     case BuiltinOperator::BuiltinOperator_SPACE_TO_DEPTH:
       loadSpaceToDepth(op, subg);
+      return;
+    case BuiltinOperator::BuiltinOperator_DEQUANTIZE:
+      loadDequantize(op,subg);
       return;
     default:
       throw std::runtime_error(
