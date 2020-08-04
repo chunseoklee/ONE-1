@@ -105,3 +105,4 @@
 #include "ir/operation/FusedBatchNorm.h"
 #include "ir/operation/LogSoftmax.h"
 #include "ir/operation/Quantize.h"
+#include "ir/operation/ResizeNearestNeighbor.h"

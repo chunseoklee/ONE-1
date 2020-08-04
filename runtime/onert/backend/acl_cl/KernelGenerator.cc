@@ -1800,6 +1800,26 @@ void KernelGenerator::visit(const ir::operation::ConvertFp16ToFp32 &node)
   _return_fn = std::move(acl_fn);
 }
 
+void KernelGenerator::visit(const ir::operation::ResizeNearestNeighbor &node)
+{
+  const auto ofm_index{node.getOutputs().at(0)};
+
+  const auto ifm_index{node.getInputs().at(ir::operation::ResizeBilinear::Input::INPUT)};
+
+  auto ofm_alloc = _tensor_builder->at(ofm_index).get();
+  auto ifm_alloc = _tensor_builder->at(ifm_index).get();
+
+  auto fn = std::make_unique<::arm_compute::CLScale>();
+
+  fn->configure(ifm_alloc->handle(), ofm_alloc->handle(),
+                ::arm_compute::InterpolationPolicy::NEAREST_NEIGHBOR, ::arm_compute::BorderMode::REPLICATE,
+                ::arm_compute::PixelValue(0.f), ::arm_compute::SamplingPolicy::TOP_LEFT);
+
+  auto acl_fn = asAclClFunction(std::move(fn));
+
+  _return_fn = std::move(acl_fn);
+}
+
 } // namespace acl_cl
 } // namespace backend
 } // namespace onert

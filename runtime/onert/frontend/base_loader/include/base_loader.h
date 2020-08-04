@@ -175,6 +175,7 @@ protected:
   void loadQuantize(const Operator *op, ir::Graph &subg);
   void loadDequantize(const Operator *op, ir::Graph &subg);
   void loadSpaceToDepth(const Operator *op, ir::Graph &subg);
+  void loadResizeNearestNeighbor(const Operator *op, ir::Graph &subg);
 
 protected:
   // Base address for mapped region for loading (if needed)
@@ -1806,6 +1807,33 @@ void BaseLoader<LoaderDomain, SpecificLoader>::loadDequantize(const Operator *op
 }
 
 template <typename LoaderDomain, typename SpecificLoader>
+void BaseLoader<LoaderDomain, SpecificLoader>::loadResizeNearestNeighbor(const Operator *op, ir::Graph &subg)
+{
+  ir::OperandIndexSequence inputs;
+  ir::OperandIndexSequence outputs;
+
+  loadOperationIO(op, inputs, outputs);
+  auto input = inputs.at(0);
+  auto size = inputs.at(1);
+
+  std::vector<std::int32_t> size_v = subg.operands().at(size).template asVector<std::int32_t>();
+
+  ir::operation::ResizeNearestNeighbor::Param param;
+  param.height_out = size_v[0];
+  param.width_out = size_v[1];
+
+  const auto *options = op->builtin_options_as_ResizeNearestNeighborOptions();
+  const auto align_corners = options->align_corners();
+
+  if(align_corners) {
+    throw std::runtime_error("ResizeNearestNeighbor: align_corners is not supported.");
+  }
+
+  std::unique_ptr<ir::Operation> new_op(new ir::operation::ResizeNearestNeighbor({input}, outputs, param));
+  subg.addOperation(std::move(new_op));
+}
+
+template <typename LoaderDomain, typename SpecificLoader>
 void BaseLoader<LoaderDomain, SpecificLoader>::loadOperation(const Operator *op, ir::Graph &subg)
 {
   const auto builtin_op = _model->operator_codes()->Get(op->opcode_index())->builtin_code();
@@ -2033,6 +2061,9 @@ void BaseLoader<LoaderDomain, SpecificLoader>::loadOperation(const Operator *op,
       return;
     case BuiltinOperator::BuiltinOperator_LEAKY_RELU:
       loadLeakyReLU(op,subg);
+      return;
+    case BuiltinOperator::BuiltinOperator_RESIZE_NEAREST_NEIGHBOR:
+      loadResizeNearestNeighbor(op, subg);
       return;
     default:
       throw std::runtime_error(
