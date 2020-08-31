@@ -64,6 +64,7 @@
 #include "ops/FusedBatchNormLayer.h"
 #include "ops/LogSoftMaxLayer.h"
 #include "ops/StatelessRandomUniformLayer.h"
+#include "ops/ErfLayer.h"
 
 #include <backend/Backend.h>
 #include <backend/IConfig.h>
@@ -1261,6 +1262,22 @@ void KernelGenerator::visit(const ir::operation::SplitV &node)
   auto fn = std::make_unique<ops::SplitVLayer>();
 
   fn->configure(in_tensor, in_size_splits, in_split_dim, num_splits, out_tensors);
+
+  _return_fn = std::move(fn);
+}
+
+void KernelGenerator::visit(const ir::operation::Erf &node)
+{
+  const auto ofm_index{node.getOutputs().at(0)};
+
+  auto output_tensor = _tensor_reg->getPortableTensor(ofm_index).get();
+  std::vector<const IPortableTensor *> input_tensors;
+  for (auto &ifm_idx : node.getInputs())
+    input_tensors.emplace_back(_tensor_reg->getPortableTensor(ifm_idx).get());
+
+  auto fn = std::make_unique<ops::ErfLayer>();
+
+  fn->configure(input_tensors, output_tensor);
 
   _return_fn = std::move(fn);
 }
