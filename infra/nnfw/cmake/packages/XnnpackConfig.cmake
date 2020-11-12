@@ -6,11 +6,11 @@ function(_Xnnpack_Build)
   nnfw_find_package(Fp16)
   
   # NOTE This line prevents multiple definitions of cpuinfo target
-  if(TARGET xnnpack)
+  if(TARGET XNNPACK)
     set(XnnpackSource_DIR ${XnnpackSource_DIR} PARENT_SCOPE)
     set(Xnnpack_FOUND TRUE PARENT_SCOPE)
     return()
-  endif(TARGET xnnpack)
+  endif(TARGET XNNPACK)
 
   if(NOT XnnpackSource_FOUND)
     message(STATUS "XNNPACK: Source not found")
