@@ -3,6 +3,7 @@ function(_Xnnpack_Build)
   nnfw_find_package(CpuInfo)
   nnfw_find_package(Pthreadpool)
   nnfw_find_package(Psimd)
+  nnfw_find_package(Fp16)
   
   # NOTE This line prevents multiple definitions of cpuinfo target
   if(TARGET xnnpack)

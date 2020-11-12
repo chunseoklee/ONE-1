@@ -79,6 +79,8 @@ option(DOWNLOAD_PTHREADPOOL "Download pthreadpool source" ON)
 option(BUILD_PTHREADPOOL "Build pthreadpool library from the source" ON)
 option(DOWNLOAD_PSIMD "Download psimd source" ON)
 option(BUILD_PSIMD "Build psimd library from the source" ON)
+option(DOWNLOAD_FP16 "Download fp16 source" ON)
+option(BUILD_FP16 "Build fp16 library from the source" ON)
 
 
 #
