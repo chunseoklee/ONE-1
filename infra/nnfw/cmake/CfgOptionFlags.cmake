@@ -75,6 +75,9 @@ option(BUILD_CPUINFO "Build cpuinfo library from the downloaded source" ON)
 option(PROFILE_RUY "Enable ruy library profiling" OFF)
 option(DOWNLOAD_XNNPACK "Download xnnpack source" ON)
 option(BUILD_XNNPACK "Build xnnpack library from the downloaded source" ON)
+option(DOWNLOAD_PTHREADPOOL "Download pthreadpool source" ON)
+option(BUILD_PTHREADPOOL "Build pthreadpool library from the source" ON)
+
 
 #
 ## Default sample build configuration

@@ -1,6 +1,7 @@
 function(_Xnnpack_Build)
   nnas_find_package(XnnpackSource QUIET)
-
+  nnfw_find_package(CpuInfo)
+  nnfw_find_package(Pthreadpool)
   # NOTE This line prevents multiple definitions of cpuinfo target
   if(TARGET xnnpack)
     set(XnnpackSource_DIR ${XnnpackSource_DIR} PARENT_SCOPE)
