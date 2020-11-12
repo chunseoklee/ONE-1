@@ -73,6 +73,8 @@ option(BUILD_ARMCOMPUTE "Build ARM Compute from the downloaded source" ON)
 option(BUILD_RUY "Build ruy library from the downloaded source" ON)
 option(BUILD_CPUINFO "Build cpuinfo library from the downloaded source" ON)
 option(PROFILE_RUY "Enable ruy library profiling" OFF)
+option(DOWNLOAD_XNNPACK "Download xnnpack source" ON)
+option(BUILD_XNNPACK "Build xnnpack library from the downloaded source" ON)
 
 #
 ## Default sample build configuration
