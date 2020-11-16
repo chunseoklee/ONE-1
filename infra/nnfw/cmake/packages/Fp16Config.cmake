@@ -3,7 +3,7 @@ function(_Fp16_Build)
 
   # NOTE This line prevents multiple definitions of target
   if(TARGET fp16)
-    set(Fp16Source_DIR ${PsimdSource_DIR} PARENT_SCOPE)
+    set(Fp16Source_DIR ${Fp16Source_DIR} PARENT_SCOPE)
     set(Fp16_FOUND TRUE PARENT_SCOPE)
     return()
   endif(TARGET fp16)
