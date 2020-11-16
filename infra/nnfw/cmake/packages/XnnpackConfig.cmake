@@ -1,10 +1,10 @@
 function(_Xnnpack_Build)
   nnas_find_package(XnnpackSource QUIET)
-  nnfw_find_package(Fxdiv)
-  nnfw_find_package(CpuInfo)
-  nnfw_find_package(Pthreadpool)
-  nnfw_find_package(Psimd)
-  nnfw_find_package(Fp16)
+  nnfw_find_package(Fxdiv QUIET)
+  nnfw_find_package(CpuInfo QUIET)
+  nnfw_find_package(Pthreadpool QUIET)
+  nnfw_find_package(Psimd QUIET)
+  nnfw_find_package(Fp16 QUIET)
 
   # NOTE This line prevents multiple definitions of cpuinfo target
   if(TARGET XNNPACK)
