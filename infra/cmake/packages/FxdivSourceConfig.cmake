@@ -9,7 +9,7 @@ function(_FxdivSource_import)
 
   envoption(EXTERNAL_DOWNLOAD_SERVER "https://github.com")
   # fxdiv commit in xnnpack 8b283aa30a31
-envoption(FXDIV_URL ${EXTERNAL_DOWNLOAD_SERVER}/Maratyszcza/FXdiv/archive/f8c5354679ec2597792bc70a9e06eff50c508b9a.tar.gz)
+  envoption(FXDIV_URL ${EXTERNAL_DOWNLOAD_SERVER}/Maratyszcza/FXdiv/archive/f8c5354679ec2597792bc70a9e06eff50c508b9a.tar.gz)
   ExternalSource_Download(FXDIV
     DIRNAME FXDIV
     URL ${FXDIV_URL})

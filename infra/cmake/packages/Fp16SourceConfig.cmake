@@ -9,7 +9,7 @@ function(_Fp16Source_import)
 
   envoption(EXTERNAL_DOWNLOAD_SERVER "https://github.com")
   # fp16 commit in xnnpack 8b283aa30a31
-envoption(FP16_URL ${EXTERNAL_DOWNLOAD_SERVER}/Maratyszcza/FP16/archive/3c54eacb74f6f5e39077300c5564156c424d77ba.tar.gz)
+  envoption(FP16_URL ${EXTERNAL_DOWNLOAD_SERVER}/Maratyszcza/FP16/archive/3c54eacb74f6f5e39077300c5564156c424d77ba.tar.gz)
   ExternalSource_Download(FP16
     DIRNAME FP16
     URL ${FP16_URL})

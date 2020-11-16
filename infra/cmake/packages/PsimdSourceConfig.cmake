@@ -9,7 +9,7 @@ function(_PsimdSource_import)
 
   envoption(EXTERNAL_DOWNLOAD_SERVER "https://github.com")
   # psimd commit in xnnpack 8b283aa30a31
-envoption(PSIMD_URL ${EXTERNAL_DOWNLOAD_SERVER}/Maratyszcza/psimd/archive/072586a71b55b7f8c584153d223e95687148a900.tar.gz)
+  envoption(PSIMD_URL ${EXTERNAL_DOWNLOAD_SERVER}/Maratyszcza/psimd/archive/072586a71b55b7f8c584153d223e95687148a900.tar.gz)
   ExternalSource_Download(PSIMD
     DIRNAME PSIMD
     URL ${PSIMD_URL})
