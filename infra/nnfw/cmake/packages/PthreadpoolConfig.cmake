@@ -17,6 +17,9 @@ function(_Pthreadpool_Build)
   SET(PTHREADPOOL_BUILD_TESTS OFF CACHE BOOL "Build pthreadpool unit tests")
   SET(PTHREADPOOL_BUILD_BENCHMARKS OFF CACHE BOOL "Build pthreadpool micro-benchmarks")
 
+  nnas_find_package(FxdivSource)
+  set(FXDIV_SOURCE_DIR ${FxdivSource_DIR} CACHE STRING "String to disable download FXDIV")
+
   add_extdirectory("${PthreadpoolSource_DIR}" PTHREADPOOL EXCLUDE_FROM_ALL)
   set_target_properties(pthreadpool PROPERTIES POSITION_INDEPENDENT_CODE ON)
   set(PthreadpoolSource_DIR ${PthreadpoolSource_DIR} PARENT_SCOPE)

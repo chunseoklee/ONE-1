@@ -1,11 +1,11 @@
 function(_Xnnpack_Build)
   nnas_find_package(XnnpackSource QUIET)
+  nnfw_find_package(Fxdiv)
   nnfw_find_package(CpuInfo)
   nnfw_find_package(Pthreadpool)
   nnfw_find_package(Psimd)
   nnfw_find_package(Fp16)
-  nnfw_find_package(Fxdiv)
-  
+
   # NOTE This line prevents multiple definitions of cpuinfo target
   if(TARGET XNNPACK)
     set(XnnpackSource_DIR ${XnnpackSource_DIR} PARENT_SCOPE)

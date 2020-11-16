@@ -14,6 +14,9 @@ function(_Fxdiv_Build)
     return()
   endif(NOT FxdivSource_FOUND)
 
+  set(FXDIV_BUILD_TESTS OFF CACHE BOOL "Build FXdiv unit tests")
+  set(FXDIV_BUILD_BENCHMARKS OFF CACHE BOOL "Build FXdiv micro-benchmarks")
+
   add_extdirectory("${FxdivSource_DIR}" FXDIV EXCLUDE_FROM_ALL)
   set(FxdivSource_DIR ${FxdivSource_DIR} PARENT_SCOPE)
   set(Fxdiv_FOUND TRUE PARENT_SCOPE)
