@@ -16,6 +16,7 @@ Source1006: cpuinfo.tar.gz
 Source1007: XNNPACK.tar.gz
 Source1008: FXDIV.tar.gz
 Source1009: PTHREADPOOL.tar.gz
+Source1010: PSIMD.tar.gz
 Source2001: nnfw.pc.in
 Source2002: nnfw-plugin.pc.in
 
@@ -122,6 +123,7 @@ tar -xf %{SOURCE1006} -C ./externals
 tar -xf %{SOURCE1007} -C ./externals
 tar -xf %{SOURCE1008} -C ./externals
 tar -xf %{SOURCE1009} -C ./externals
+tar -xf %{SOURCE1010} -C ./externals
 
 %build
 %ifarch arm armv7l aarch64 x86_64
