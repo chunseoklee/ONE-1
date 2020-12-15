@@ -238,7 +238,7 @@ int main(const int argc, char **argv)
       phases.run(
         "EXECUTE",
         [&](const benchmark::Phase &, uint32_t) { NNPR_ENSURE_STATUS(nnfw_run(session)); },
-        args.getNumRuns(), true);
+        args.getNumRuns());
     }
     else
     {
@@ -259,7 +259,7 @@ int main(const int argc, char **argv)
                     << "run " << nth + 1 << " takes " << phase.time[nth] / 1e3 << " ms"
                     << std::endl;
         },
-        args.getNumRuns(), true);
+        args.getNumRuns());
     }
 
 #if defined(ONERT_HAVE_HDF5) && ONERT_HAVE_HDF5 == 1

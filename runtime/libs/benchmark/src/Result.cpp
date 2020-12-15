@@ -132,9 +132,17 @@ void printResultMemory(
       std::cout << "- " << std::setw(12) << std::left << getPhaseString(i) << " takes "
                 << memory[i][j] << " kb" << std::endl;
     }
-    // Tricky. Handle WARMUP as EXECUTE
-    std::cout << "- " << std::setw(12) << std::left << getPhaseString(PhaseEnum::EXECUTE)
+    // Warmup memory
+    std::cout << "- " << std::setw(12) << std::left << getPhaseString(PhaseEnum::WARMUP)
               << " takes " << memory[PhaseEnum::WARMUP][j] << " kb" << std::endl;
+    std::cout << "- " << std::setw(12) << std::left << "PEAK"
+              << " takes " << peakMemory(memory, j) << " kb" << std::endl;
+    std::cout << "===================================" << std::endl;
+
+
+    // EXECUTE memory
+    std::cout << "- " << std::setw(12) << std::left << getPhaseString(PhaseEnum::EXECUTE)
+              << " takes " << memory[PhaseEnum::EXECUTE][j] << " kb" << std::endl;
     std::cout << "- " << std::setw(12) << std::left << "PEAK"
               << " takes " << peakMemory(memory, j) << " kb" << std::endl;
     std::cout << "===================================" << std::endl;
@@ -175,7 +183,7 @@ Result::Result(const Phases &phases)
   if (option.memory)
   {
     print_memory = true;
-    for (int i = PhaseEnum::MODEL_LOAD; i < PhaseEnum::EXECUTE; ++i)
+    for (int i = PhaseEnum::MODEL_LOAD; i <= PhaseEnum::EXECUTE; ++i)
     {
       auto phase = phases.at(gPhaseStrings[i]);
       for (int j = MemoryType::RSS; j <= MemoryType::PSS; ++j)
