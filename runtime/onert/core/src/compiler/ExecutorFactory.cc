@@ -401,8 +401,7 @@ ExecutorFactory::createLinearExecutor(std::unique_ptr<compiler::LoweredGraph> lo
       auto &fn_seq = pair.second;
       auto &op = lowered_graph->graph().operations().at(op_ind);
       auto lower_info = lowered_graph->lower_info().operation.getRawPtr(op_ind);
-      if (options.he_profiling_mode)
-        fn_seq->wrap<SyncFunction>(lower_info->backend()->config());
+      fn_seq->wrap<SyncFunction>(lower_info->backend()->config());
       if (!dealloc_list_map[op_ind].empty())
         fn_seq->append(std::make_unique<DeallocFunction>(dealloc_list_map[op_ind]));
       builder.append(op_ind, {op_ind, &op, lower_info, std::move(fn_seq)});
