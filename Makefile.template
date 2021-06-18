@@ -21,11 +21,7 @@ else ifneq (,$(findstring arm,$(TARGET_ARCH_BASE)))
 else ifneq (,$(findstring aarch64,$(TARGET_ARCH_BASE)))
 	TARGET_ARCH_LC=aarch64
 endif
-ifneq (,$(findstring android,$(TARGET_OS)))
-	# Anndroid only allow aarch64 target-arch
-	TARGET_ARCH_LC=aarch64
-	TARGET_OS=android
-endif
+
 # Set CROSS_BUILD=1 when ROOTFS_DIR is given, and TARGET_ARCH is different to HOST_ARCH.
 ifneq ($(ROOTFS_DIR),)
 ifneq ($(TARGET_ARCH_LC),$(HOST_ARCH_LC))
