@@ -43,6 +43,16 @@ namespace cker
 namespace
 {
 
+template <class T>
+inline T DivideRoundUp(T x, T q) {
+  return x / q + T(x % q != 0);
+}
+
+template <class T>
+inline T RoundUp(T x, T q) {
+  return q * DivideRoundUp(x, q);
+}
+
 inline static size_t round_down_po2(size_t n, size_t q) {
   assert(q != 0);
   assert((q & (q - 1)) == 0);
@@ -1146,81 +1156,102 @@ inline void NeonMatrixBatchVectorMultiplyAccumulate(const int8_t *__restrict__ m
   const int postamble_half_start = m_cols & ~(kWeightsPerNeonLane - 1);
   const int postamble_start = m_cols & ~((kWeightsPerNeonLane >> 1) - 1);
 
-  for (int batch = 0; batch < n_batch; ++batch)
-  {
-    const float batch_scaling_factor = scaling_factors[batch];
-    // Copy the vector data to an aligned vector.
-    memcpy(aligned_vec, vectors + batch * m_cols, sizeof(int8_t) * m_cols);
-    // Compute dot-product for every column.
-    for (int row = 0; row < m_rows; ++row, result += result_stride)
-    {
-      // Get the address of the first element of the row.
-      int8_t *row_ptr = (int8_t *)matrix + row * m_cols; // NOLINT
-      if (unaligned)
-      {
-        memcpy(aligned_row, row_ptr, sizeof(int8_t) * m_cols);
-        row_ptr = aligned_row;
-      }
+  uint32_t mr = 4;
+  uint32_t mc = n_batch;
+  uint32_t nr = 4;
+  uint32_t nc = m_rows;
+  uint32_t kc = m_cols;
+  uint32_t kr = 4;
+  const size_t kc_stride = RoundUp(kc, kr);
 
-      // Initialize the dot product sum for the row to 0.
-      int32x4_t dotprod_32x4 = vmovq_n_s32(0);
+  std::vector<int8_t> c(mc*nc);
 
-      // Prefetch the row to cache.
-      __builtin_prefetch(row_ptr, 0 /* prefetch for read */, 3 /* temporal locality */);
+  for (uint32_t m = 0; m < mc; m += mr) {
+    const uint32_t mb = std::min(mc - m, mr);
+    for (uint32_t n = 0; n < nc; n += nr) {
+      const uint32_t nb = std::min(nc - n, nr);
+        xnn_qs8_gemm_minmax_ukernel_4x8c2__neon_mull_padal_dup(
+          mb, nb, kc * sizeof(int8_t),
+          vectors + m * kc, kc * sizeof(int8_t),
+          matrix + n * (kc_stride * sizeof(int8_t) + sizeof(int32_t)),
+          c.data() + (m) * nc + n, nc * sizeof(int8_t), nr * sizeof(int8_t));
+    }
+  }
+  /* for (int batch = 0; batch < n_batch; ++batch) */
+  /* { */
+  /*   const float batch_scaling_factor = scaling_factors[batch]; */
+  /*   // Copy the vector data to an aligned vector. */
+  /*   memcpy(aligned_vec, vectors + batch * m_cols, sizeof(int8_t) * m_cols); */
+  /*   // Compute dot-product for every column. */
+  /*   for (int row = 0; row < m_rows; ++row, result += result_stride) */
+  /*   { */
+  /*     // Get the address of the first element of the row. */
+  /*     int8_t *row_ptr = (int8_t *)matrix + row * m_cols; // NOLINT */
+  /*     if (unaligned) */
+  /*     { */
+  /*       memcpy(aligned_row, row_ptr, sizeof(int8_t) * m_cols); */
+  /*       row_ptr = aligned_row; */
+  /*     } */
 
-      // For every block of 16 8-bit elements.
-      int col = 0;
-      for (; col < postamble_half_start; col += kWeightsPerNeonLane)
-      {
-        // Load 16 8-bit values from the row and vector, each, to operate on.
-        // Here the assumption is that each buffer is 4-byte aligned. Otherwise,
-        // performance may suffer significantly.
-        assert( // NOLINT
-          ((uintptr_t)(&row_ptr[col]) & (kWeightsPerUint32 - 1)) == 0);
-        const int8x16_t s1_8x16 = vld1q_s8((const int8_t *)(aligned_vec + col));
-        const int8x16_t s2_8x16 = vld1q_s8((const int8_t *)(row_ptr + col));
-        // Multiply the low bits (i.e. the lower 8 8bit numbers in the
-        // registers).
-        int16x8_t prod_16x8 = vmull_s8(vget_low_s8(s1_8x16), vget_low_s8(s2_8x16));
-        // Multiply the high bits (i.e. the higher 8 8bit numbers in the
-        // registers), and accumulate with the result of the low bits product.
-        // The assumption here is that overflow will not happen as we quantize
-        // our values to be in the range [-127, 127]. As such the sum of the 2
-        // products is always strictly smaller than 15-bits (32767 in absolute
-        // value).
-        prod_16x8 = vmlal_s8(prod_16x8, vget_high_s8(s1_8x16), vget_high_s8(s2_8x16));
+  /*     // Initialize the dot product sum for the row to 0. */
+  /*     int32x4_t dotprod_32x4 = vmovq_n_s32(0); */
 
-        dotprod_32x4 = vpadalq_s16(dotprod_32x4, prod_16x8);
-      } // for col
+  /*     // Prefetch the row to cache. */
+  /*     __builtin_prefetch(row_ptr, 0 /\* prefetch for read *\/, 3 /\* temporal locality *\/); */
 
-      // Half iteration dealing only 8 elements
-      // TODO(raziel): if (ABSL_PREDICT_FALSE(col < postamble_start))
-      if (col < postamble_start)
-      {
-        // Load 8 8-bit values from the row and column each to operate on.
-        // Here the assumption is that each buffer is 4-bytes aligned.
-        // Otherwise, performance may suffer significantly.
-        assert( // NOLINT
-          ((uintptr_t)(&row_ptr[col]) & (kWeightsPerUint32 - 1)) == 0);
-        const int8x8_t s1_8x8 = vld1_s8((const int8_t *)(aligned_vec + col));
-        const int8x8_t s2_8x8 = vld1_s8((const int8_t *)(row_ptr + col));
-        const int16x8_t prod_16x8 = vmull_s8(s1_8x8, s2_8x8);
-        dotprod_32x4 = vpadalq_s16(dotprod_32x4, prod_16x8);
-        col += (kWeightsPerNeonLane >> 1);
-      }
-      // Add the 4 intermediate sum values to get the final dot-prod value for
-      // this row.
-      int32_t dotprod = AccumulateNeonLane(dotprod_32x4);
-      // Postamble loop.
-      // TODO(raziel): if (ABSL_PREDICT_FALSE(col < m_cols))
-      for (; col < m_cols; ++col)
-      {
-        dotprod += row_ptr[col] * aligned_vec[col];
-      } // for col
+  /*     // For every block of 16 8-bit elements. */
+  /*     int col = 0; */
+  /*     for (; col < postamble_half_start; col += kWeightsPerNeonLane) */
+  /*     { */
+  /*       // Load 16 8-bit values from the row and vector, each, to operate on. */
+  /*       // Here the assumption is that each buffer is 4-byte aligned. Otherwise, */
+  /*       // performance may suffer significantly. */
+  /*       assert( // NOLINT */
+  /*         ((uintptr_t)(&row_ptr[col]) & (kWeightsPerUint32 - 1)) == 0); */
+  /*       const int8x16_t s1_8x16 = vld1q_s8((const int8_t *)(aligned_vec + col)); */
+  /*       const int8x16_t s2_8x16 = vld1q_s8((const int8_t *)(row_ptr + col)); */
+  /*       // Multiply the low bits (i.e. the lower 8 8bit numbers in the */
+  /*       // registers). */
+  /*       int16x8_t prod_16x8 = vmull_s8(vget_low_s8(s1_8x16), vget_low_s8(s2_8x16)); */
+  /*       // Multiply the high bits (i.e. the higher 8 8bit numbers in the */
+  /*       // registers), and accumulate with the result of the low bits product. */
+  /*       // The assumption here is that overflow will not happen as we quantize */
+  /*       // our values to be in the range [-127, 127]. As such the sum of the 2 */
+  /*       // products is always strictly smaller than 15-bits (32767 in absolute */
+  /*       // value). */
+  /*       prod_16x8 = vmlal_s8(prod_16x8, vget_high_s8(s1_8x16), vget_high_s8(s2_8x16)); */
 
-      *result += dotprod * batch_scaling_factor;
-    } // for row
-  }   // for batch
+  /*       dotprod_32x4 = vpadalq_s16(dotprod_32x4, prod_16x8); */
+  /*     } // for col */
+
+  /*     // Half iteration dealing only 8 elements */
+  /*     // TODO(raziel): if (ABSL_PREDICT_FALSE(col < postamble_start)) */
+  /*     if (col < postamble_start) */
+  /*     { */
+  /*       // Load 8 8-bit values from the row and column each to operate on. */
+  /*       // Here the assumption is that each buffer is 4-bytes aligned. */
+  /*       // Otherwise, performance may suffer significantly. */
+  /*       assert( // NOLINT */
+  /*         ((uintptr_t)(&row_ptr[col]) & (kWeightsPerUint32 - 1)) == 0); */
+  /*       const int8x8_t s1_8x8 = vld1_s8((const int8_t *)(aligned_vec + col)); */
+  /*       const int8x8_t s2_8x8 = vld1_s8((const int8_t *)(row_ptr + col)); */
+  /*       const int16x8_t prod_16x8 = vmull_s8(s1_8x8, s2_8x8); */
+  /*       dotprod_32x4 = vpadalq_s16(dotprod_32x4, prod_16x8); */
+  /*       col += (kWeightsPerNeonLane >> 1); */
+  /*     } */
+  /*     // Add the 4 intermediate sum values to get the final dot-prod value for */
+  /*     // this row. */
+  /*     int32_t dotprod = AccumulateNeonLane(dotprod_32x4); */
+  /*     // Postamble loop. */
+  /*     // TODO(raziel): if (ABSL_PREDICT_FALSE(col < m_cols)) */
+  /*     for (; col < m_cols; ++col) */
+  /*     { */
+  /*       dotprod += row_ptr[col] * aligned_vec[col]; */
+  /*     } // for col */
+
+  /*     *result += dotprod * batch_scaling_factor; */
+  /*   } // for row */
+  /* }   // for batch */
 
   if (unaligned)
   {
