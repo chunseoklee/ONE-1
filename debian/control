@@ -23,3 +23,15 @@ Architecture: amd64
 Multi-Arch: same
 Depends: one-compiler, ${shlibs:Depends}, ${misc:Depends}
 Description: one-compiler test package
+
+Package: one-runtime
+Architecture: amd64
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: one-runtime package
+
+Package: one-runtime-dev
+Architecture: amd64
+Multi-Arch: same
+Depends: one-runtime, ${shlibs:Depends}, ${misc:Depends}
+Description: one-runtime development package

@@ -3,20 +3,34 @@ export DH_VERBOSE = 1
 export NNAS_BUILD_PREFIX = build
 export PRESET = 20210406
 export _DESTDIR = debian/tmp/usr
+export BUILD_TYPE=release
+export OPTIONS=-DBUILD_TFLITE_COMPARATOR_TEST_TOOL=0 -DBUILD_NNPACKAGE_RUN=0 -DBUILD_TFLITE_RUN=0 -DBUILD_NNAPI_TEST=0 -DBUILD_RUNTIME_NNAPI_TEST=0 -DBUILD_TFLITE_BENCHMARK_MODEL=0 -DBUILD_TFLITE_VANILLA_RUN=0 -DBUILD_TENSORFLOW_LITE_2_3_0=0 -DBUILD_TENSORFLOW_LITE=0
 
 %:
 	dh $@
 
 override_dh_auto_build:
+ifdef BUILD_COMPILER
 	./nnas create-package --preset $(PRESET) --prefix "$(_DESTDIR)"
-
+endif
+	make -f Makefile.template
 override_dh_auto_install:
+ifdef BUILD_COMPILER
 	cmake --build "$(NNAS_BUILD_PREFIX)/nncc" -- install
-
+endif
+	make -f Makefile.template install
 override_dh_install:
+ifdef BUILD_COMPILER
 	install -t "$(_DESTDIR)/bin" -D "tools/nnpackage_tool/model2nnpkg/model2nnpkg.sh"
 	install -T -m 755 -D "infra/packaging/res/tf2nnpkg.${PRESET}" "$(_DESTDIR)/bin/tf2nnpkg"
 	dh_install
+endif
+	install -d debian/tmp/usr/lib
+	install Product/out/lib/* debian/tmp/usr/lib/
+	install -d debian/tmp/usr/include/
+	cp -r Product/out/include/* debian/tmp/usr/include/
 
+ifdef CI_BUILD
 override_dh_builddeb:
-	dh_builddeb --destdir=$(NNAS_BUILD_PREFIX)
+	builddeb_builddeb --destdir=$(NNAS_BUILD_PREFIX)
+endif
