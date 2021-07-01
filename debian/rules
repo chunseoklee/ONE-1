@@ -29,6 +29,8 @@ endif
 	install Product/out/lib/* debian/tmp/usr/lib/
 	install -d debian/tmp/usr/include/
 	cp -r Product/out/include/* debian/tmp/usr/include/
+	dh_install -p one-runtime
+	dh_install -p one-runtime-dev
 
 ifdef CI_BUILD
 override_dh_builddeb:
