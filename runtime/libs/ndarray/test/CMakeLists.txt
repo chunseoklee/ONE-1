@@ -1,4 +1,4 @@
-if(NOT BUILD_NDARRAY_TEST)
+if(NOT TARGET ndarray)
     return()
 endif()
 
